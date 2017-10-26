@@ -714,12 +714,6 @@ def crypt():
 	
 	nonce_increment()
 	
-def MAC_FORMAT (MAC1):
-
-	global MAC
-	MAC1 = MAC1.replace(":", "")
-	#print MAC1
-	
 def ENVOI_TRAME ():
 
 	global TRAME_VIDE_32
@@ -1511,7 +1505,7 @@ def stock_heure():
 	with open('/home/Devismes_Bridge/JSON_List/Last_connected.json', 'w') as outfile:  
 		json.dump(data8, outfile)
 				
-	a_dict1 = {"Heure": {"DATE_MAX": DATE_MAX}}
+	a_dict1 = {"Heure": {"DATE_MAX": DATE_MAX, "Conn": "1"}}
 
 	with open('/home/Devismes_Bridge/JSON_List/Last_connected.json') as f:
 		dataa = json.load(f)	

@@ -3,6 +3,9 @@
 
 import smtplib
 import json
+import os
+import os.path
+
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 
@@ -16,6 +19,7 @@ ALRM = 'VIDE'
 message_alarme = "message_alarme"
 fromaddr = "VIDE"
 password = "VIDE"
+toaddr = "VIDE"
 
 def Arguments():
 
@@ -54,6 +58,7 @@ def recup_mail():
 
 	global fromaddr
 	global password
+	global toaddr
 	
 	with open('/home/Devismes_Bridge/JSON_List/mail.json') as f:
 		dataa = json.load(f)	
@@ -70,11 +75,12 @@ def envoi_mail():
 	global message_alarme
 	global fromaddr
 	global password
+	global toaddr
 	
 	#fromaddr="projetdevismes@gmail.com"
 	#password="devismes2017"
 
-	toaddr="maxime.f80@gmail.com"
+	#toaddr="maxime.f80@gmail.com"
 
 	msg = MIMEMultipart()
 	msg['From'] = fromaddr
@@ -91,12 +97,24 @@ def envoi_mail():
 	server.sendmail(fromaddr, toaddr, text)
 	server.quit()
 	
+def Creation_Dossier_Device():
+	
+	file_path = "/home/Devismes_Bridge/JSON_List/mail.json"
+		
+	if not os.path.exists(file_path):
+		print "EXIST Device = Create"
+		file1 = open('/home/Devismes_Bridge/JSON_List/mail.json', 'w+')
+		file1.write('{"mail": {"Dest": "VIDE", "adresse": "VIDE", "MP": "VIDE"}}')
+	else:
+		print "EXIST Device = OK"
+
 def main():
 
 	print("MAIN")
 	print "SYS_VER:", (sys.version)
 	
 	Arguments()
+	Creation_Dossier_Device()
 	type_alarme()
 	recup_mail()
 	montage_mail()
