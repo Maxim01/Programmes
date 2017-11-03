@@ -5,13 +5,9 @@ import csv
 import json
 import re
 import sys
-import subprocess
 
 NOM_SERR = "VIDE"
-NOM_SERR1 = "VIDE"
 MODE = "VIDE"
-MAC_DEVICE = "VIDE"
-conv_ok = False
 
 def Arguments():
 
@@ -26,24 +22,19 @@ def Arguments():
 
 def CSV_CONV_LOGS():	
 	
-	global MAC_DEVICE
-	global NOM_SERR1
-	
-	with open("/home/Devismes_Bridge/Equipements/" + MAC_DEVICE +"/Logs.json") as f:
+	with open('/home/Devismes_Bridge/Equipements/d1:f7:b1:98:bd:39/Logs.json') as f:
 			dataa = json.load(f)	
 			 
 	#print dataa 
 	#csv.writer(open("data.csv", "wb"), delimiter=";")
 
-	f = csv.writer(open("/home/Devismes_Bridge/Equipements/" + MAC_DEVICE +"/Logs.csv", "wb+"), delimiter=";")
-	process = subprocess.Popen("sudo chmod 644 /home/Devismes_Bridge/Equipements/" + MAC_DEVICE +"/Logs.csv", shell=True, stdout=subprocess.PIPE)
-	process.wait()
+	f = csv.writer(open("/home/Devismes_Bridge/Equipements/d1:f7:b1:98:bd:39/Logs.csv", "wb+"), delimiter=";")
 
 	# Write CSV Header, If you dont need that, remove this line
-	f.writerow(["Nom de la serrure", NOM_SERR1])
+	f.writerow(["Nom de la serrure", NOM_SERR])
 	f.writerow([""])
 	f.writerow([""])
-	f.writerow(["", "Action", "Heure", "Date", "Nom", "MAC"])
+	f.writerow(["", "Action", "Date", "Nom", "MAC"])
 
 	i = 0
 
@@ -55,7 +46,7 @@ def CSV_CONV_LOGS():
 		
 		print "Num_Log", Num_Log
 		
-		if dataa[Num_Log]["ACTION"] == "01":
+		if dataa[Num_Log]["ACTION"] == "00":
 			Action = "Ouvert"
 		else:
 			Action = "Ferme"
@@ -103,19 +94,15 @@ def CSV_CONV_LOGS():
 		f.writerow([Num_Log, Action, Heure, Date, Nom_USER, MAC_USER2])
 		
 def CSV_CONV_USER():	
-
-	global NOM_SERR1
-	global MAC_DEVICE 
 	
-	with open("/home/Devismes_Bridge/Equipements/"+ MAC_DEVICE + "/Users.json") as f:
+	with open('/home/Devismes_Bridge/Equipements/d1:f7:b1:98:bd:39/Users.json') as f:
 			dataa = json.load(f)	
 			 
 	#print dataa 
 	#csv.writer(open("data.csv", "wb"), delimiter=";")
 
-	f = csv.writer(open("/home/Devismes_Bridge/Equipements/" + MAC_DEVICE + "/Users.csv", "wb+"), delimiter=";")
-	process = subprocess.Popen("sudo chmod 644 /home/Devismes_Bridge/Equipements/" + MAC_DEVICE +"/Users.csv", shell=True, stdout=subprocess.PIPE)
-	process.wait()
+	f = csv.writer(open("/home/Devismes_Bridge/Equipements/d1:f7:b1:98:bd:39/Users.csv", "wb+"), delimiter=";")
+	
 	# "USER_25": {
     # "NOM_USER": "4461766964", 
     # "WHITELIST": "00", 
@@ -124,7 +111,7 @@ def CSV_CONV_USER():
 	# }, 
 
 	# Write CSV Header, If you dont need that, remove this line
-	f.writerow(["Nom de la serrure", NOM_SERR1])
+	f.writerow(["Nom de la serrure", NOM_SERR])
 	f.writerow([""])
 	f.writerow([""])
 	f.writerow(["", "Nom","MAC","Blacklist","Droits"])
@@ -165,40 +152,21 @@ def CSV_CONV_USER():
 		
 def recherche_user():
 
-	global MAC_DEVICE
-	global NOM_SERR
-	global conv_ok
-	global NOM_SERR1
-	
 	print "recherche"
-	
-	with open('/home/Devismes_Bridge/JSON_List/Devices.json') as data_file:    
-		jdata = json.load(data_file)
-		
-	if('MAC' in jdata[NOM_SERR] and 'NOM' in jdata[NOM_SERR]):
-		conv_ok = True
-		MAC_DEVICE = jdata[NOM_SERR]["MAC"]
-		NOM_SERR1 = jdata[NOM_SERR]["NOM"]
-	else:
-		conv_ok = False
 		
 def main():
 	
 	global NOM_SERR
 	global MODE
-	global conv_ok
 	
 	print("MAIN")
 	print "SYS_VER:", (sys.version)
 	Arguments()
-	recherche_user()
 	
-	if (conv_ok == True):
-	
-		if MODE == '1':
-			CSV_CONV_LOGS()
-		if MODE == '2':
-			CSV_CONV_USER()
+	if MODE == '1':
+		CSV_CONV_LOGS()
+	if MODE == '2':
+		CSV_CONV_USER()
 
 	
 

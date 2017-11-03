@@ -49,7 +49,6 @@ def mail_origine():	 #base SQL !!!!
 			dataa = json.load(f)	
 		
 		dataa['mail']['adresse'] = ADD_ARG	
-		dataa['mail']['MP'] = MDP_ARG
 		
 		with open('/home/Devismes_Bridge/JSON_List/mail.json', 'w') as f:
 			json.dump(dataa, f, indent=2)	
@@ -80,11 +79,10 @@ def Arguments():
 			DEST_ARG = sys.argv[2]
 			mail_dest()
 			
-	if (len(sys.argv) == 4) and (sys.argv[1] == '3'): #on modifie le mail d'origine et mot de passe
+	if (len(sys.argv) == 3) and (sys.argv[1] == '3'): #on modifie le mail d'origine et mot de passe
 	
 			print "modifie mail d'origine et mot de passe"
-			ADD_ARG = sys.argv[2]
-			MDP_ARG = sys.argv[3]	
+			ADD_ARG = sys.argv[2]	
 			mail_origine()
 		
 def main():

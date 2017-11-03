@@ -219,25 +219,28 @@ def Charger_Device():
 
 def Charge_MDP():
 
-	global MAC_DEVICE
 	global MDP
+	global DEVICE_ARG
 	
-	MAC2 = MAC_DEVICE
+	process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/compteur_serrure.py 7 "+ DEVICE_ARG, shell=True, stdout=subprocess.PIPE)
+	process.wait()
+	(out, err) = process.communicate()
+	Data_Scan = out.splitlines()
 	
-	print "MAC2: ", MAC2
+	print "Data_Scan", Data_Scan
+	print "Data_Scan_len ", len(Data_Scan)
+	
+	if len(Data_Scan) == 19:
+	
+		MP4 = Data_Scan[18].split(":")
 		
+		print "MP4:", MP4[1]
+		MDP = str(MP4[1].strip())
+		P = MDP
 		
-	# e9:e5:e3:72:12:5a
-	with open('/home/Devismes_Bridge/Equipements/' + MAC2 + '/Pass.json') as f:   
-			dataa = json.load(f)	
-			
-	# with open('/home/Devismes_Bridge/Equipements/e9:e5:e3:72:12:5a/Pass.json') as f:   
-			# dataa = json.load(f)
-	
-	print dataa
-	P = dataa["Password"]["Pass"]
-	MDP = P
-	print "CHARGE_MDP : ", P
+		print "CHARGE_MDP : ", P
+	else:
+		MDP = "0000000000000000"
 	
 		
 def Connexion_Device():	
@@ -1385,6 +1388,8 @@ def ENVOI_DE_TRAMES2():
 		DROITS_MODIF = '00'
 	
 	if(MODE_CONNEXION_1 == '1'): #0 recupere liste utilisateur
+	
+		update_conn_USER()	#permet de lite automatiqument la liste log uitlisateurs si conn = 0
 	 
 		Trame_VIDE_7 = '00'
 		open('/home/Devismes_Bridge/Equipements/' + MAC_DEVICE + '/Users.json', 'w').close()	
@@ -1418,9 +1423,11 @@ def ENVOI_DE_TRAMES2():
 		#MODE_CONNEXION_1 = '2' #A ENLEVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		
 			
 	if(MODE_CONNEXION_1 == '2'): #2 recupere les logs
+	
+		update_conn_LOG()	#permet de lite automatiqument la liste log uitlisateurs si conn = 0
 	 
 		Trame_VIDE_7 = '00' #nb de logs a afficher !
-		NB_LOGS = 125
+		NB_LOGS = 100
 		
 		open('/home/Devismes_Bridge/Equipements/' + MAC_DEVICE + '/Logs.json', 'w').close()	
 		data8 = {} 
@@ -1490,25 +1497,44 @@ def ENVOI_DE_TRAMES2():
 	if(MODE_CONNEXION_1 == '5'): #5 etablit une connexion simple, pas besoin de mot de passe en plus
 	
 			print "Mode de connexion simple pas de trames supplementaires"
+			
+def update_conn_LOG():
+
+	print "DEVICE_ARG_LOGS", DEVICE_ARG
+	
+	with open('/home/Devismes_Bridge/JSON_List/Devices.json') as f:
+		dataa = json.load(f)	
+		 
+	dataa[DEVICE_ARG]["LOG_CONN"] = "1"
+
+	with open('/home/Devismes_Bridge/JSON_List/Devices.json', 'w') as f:
+		json.dump(dataa, f, indent=2)
+		
+def update_conn_USER():
+
+	print "DEVICE_ARG_USER", DEVICE_ARG
+	with open('/home/Devismes_Bridge/JSON_List/Devices.json') as f:
+		dataa = json.load(f)	
+		 
+	dataa[DEVICE_ARG]["USER_CONN"] = "1"
+
+	with open('/home/Devismes_Bridge/JSON_List/Devices.json', 'w') as f:
+		json.dump(dataa, f, indent=2)
+
 
 def stock_heure():
 	
-	date = datetime.datetime.now()
+	date = strftime("%H:%M:%S   %d/%m/%Y", time.localtime())
 	DATE_MAX = str(date)
 	
 	print "DATE_MAX", DATE_MAX
-	
-	
-	open('/home/Devismes_Bridge/JSON_List/Last_connected.json', 'w').close()	
-	data8 = {}  
-
-	with open('/home/Devismes_Bridge/JSON_List/Last_connected.json', 'w') as outfile:  
-		json.dump(data8, outfile)
-				
-	a_dict1 = {"Heure": {"DATE_MAX": DATE_MAX, "Conn": "1"}}
 
 	with open('/home/Devismes_Bridge/JSON_List/Last_connected.json') as f:
 		dataa = json.load(f)	
+		
+	Conn = dataa["Heure"]["Conn"]
+					
+	a_dict1 = {"Heure": {"DATE_MAX": DATE_MAX, "Conn": Conn}}
 		 
 	dataa.update(a_dict1)
 

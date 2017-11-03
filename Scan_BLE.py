@@ -251,6 +251,7 @@ def Nouveau_Device():  #associe le numero de device a l adresse MAC
 	else:	
 		#Invisible2()
 		if (MAC_fusion != 'VIDE'):
+			Creation_Dossier()
 			Heure_Scan_Device() # actualise scan + Rssi + visiblite
 			WL_Device()
 	
@@ -264,8 +265,11 @@ def Creation_Dossier():
 	global MAC_fusion
 	
 	file_path = "/home/Devismes_Bridge/Equipements/" + MAC_fusion + "/test.txt"
+	
+	print "file_path", file_path
 	directory = os.path.dirname(file_path)
-		
+	print "directory", directory	
+	
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 		print "EXIST 2"
@@ -298,7 +302,18 @@ def Ajoute_Nouveau_Device():
 		Heure_Scan = strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 		DATE_MAX = str(Heure_Scan)
 		VISIBLE = 'OUI'		
-		a_dict1 = {Device_name: {'MAC': MAC_fusion, 'RSSI': RSSI_fusion, 'MANUF': MANUF_fusion, 'NOM': NOM_fusion, 'ETAT_penes': ETAT_penes, 'ETAT_surv': ETAT_surv, 'BATT': BATT_fusion, 'Heure_Scan': DATE_MAX, 'VISIBLE': VISIBLE, 'WL': '0'}}
+		a_dict1 = {Device_name: 	{'MAC': MAC_fusion, 
+									'RSSI': RSSI_fusion, 
+									'MANUF': MANUF_fusion, 
+									'NOM': NOM_fusion, 
+									'ETAT_penes': ETAT_penes, 
+									'ETAT_surv': ETAT_surv, 
+									'BATT': BATT_fusion, 
+									'Heure_Scan': DATE_MAX, 
+									'VISIBLE': VISIBLE, 
+									'WL': '0',
+									'USER_CONN':'0',
+									'LOG_CONN':'0'}}
 
 		with open('/home/Devismes_Bridge/JSON_List/Devices.json') as f:
 			dataa = json.load(f)	
@@ -340,6 +355,8 @@ def Reaction_Device():
 	global NOM_fusion
 	global NUM_DEV
 	
+	global NUM_DEV2
+	
 	#WL_Device on whitelist le device si le mot de passe rece en trame 41
 	
 	if Alarme == "1" and WL_Device1 == True: #l'alame est enclenchee //envoyer mail a qqun
@@ -351,25 +368,36 @@ def Reaction_Device():
 	if Modif_U == "1" and WL_Device1 == True: #une modif sur la liste user a eu lieu
 		print "Modif_U Modif_U Modif_U Modif_U Modif_U  "
 		print "Numero_device", NUM_DEV
-		process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/Loader_BLE.py Device_" + str(NUM_DEV) + " " + "1", shell=True, stdout=subprocess.PIPE)
-		process.wait()
-		(out, err) = process.communicate()
-		#print "program output:", out
-
-		Data_Scan = out.splitlines()
-		#print Data_Scan
+		
+		Device_name	= "Device_" + str(NUM_DEV2);
+		
+		with open('/home/Devismes_Bridge/JSON_List/Devices.json') as f:
+			dataa = json.load(f)	
+		 
+		if dataa[Device_name]["USER_CONN"] == "0":
+			print "Reactualisation user"
+			process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/Loader_BLE.py Device_" + str(NUM_DEV) + " " + "1", shell=True, stdout=subprocess.PIPE)
+			process.wait()
+			(out, err) = process.communicate()
+			Data_Scan = out.splitlines()
+			#print Data_Scan
 		
 	if Modif_L == "1" and WL_Device1 == True: #une modif sur les logs a eu lieu
 		print "Modif_L Modif_L Modif_L Modif_L Modif_L " 
 		print "Numero_device LOGS", Numero_device
-		process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/Loader_BLE.py Device_" + str(NUM_DEV) + " " + "2", shell=True, stdout=subprocess.PIPE)
-		#process.wait()
-		process.wait()
-		(out, err) = process.communicate()
-		#print "program output:", out
-
-		Data_Scan = out.splitlines()
-		print Data_Scan
+		
+		Device_name	= "Device_" + str(NUM_DEV2);
+		
+		with open('/home/Devismes_Bridge/JSON_List/Devices.json') as f:
+			dataa = json.load(f)	
+		
+		if dataa[Device_name]["LOG_CONN"] == "0":
+			print "Reactualisation logs"
+			process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/Loader_BLE.py Device_" + str(NUM_DEV) + " " + "2", shell=True, stdout=subprocess.PIPE)
+			process.wait()
+			(out, err) = process.communicate()
+			Data_Scan = out.splitlines()
+			print Data_Scan
 		
 		#os.system("sudo python Loader_BLE.py Device_" + str(Numero_device) + " " + "2")
 		
@@ -535,35 +563,62 @@ def Test_Equipement():
 				Reaction_Device()
 				
 				
-
+# def Creation_Dossier_Device():
+	
+	# file_path = "/home/Devismes_Bridge/JSON_List/mail.json"
+		
+	# if not os.path.exists(file_path):
+		# print "EXIST Device = Create"
+		# file1 = open('/home/Devismes_Bridge/JSON_List/mail.json', 'w+')
+		# file1.write('{"mail": {"Dest": "VIDE", "adresse": "VIDE", "MP": "VIDE"}}')
+	# else:
+		# print "EXIST Device = OK"
+				
 def Creation_Dossier_Device():
 	
-	file_path = "/home/Devismes_Bridge/JSON_List/test.txt"
-	directory = os.path.dirname(file_path)
-		
+	file_path1 = "/home/Devismes_Bridge/JSON_List/mdp.json"
+	file_path2 = "/home/Devismes_Bridge/JSON_List/mail.json"
+	file_path3 = "/home/Devismes_Bridge/JSON_List/Last_connected.json"
+	file_path4 = "/home/Devismes_Bridge/JSON_List/Devices.json"
+	file_path5 = "/home/Devismes_Bridge/Equipements/clef/clef.json"
+	
+	directory = os.path.dirname(file_path1)
+	
 	if not os.path.exists(directory):
 		os.makedirs(directory)
-		print "EXIST Device = Create"
-		file1 = open('/home/Devismes_Bridge/JSON_List/Devices.json', 'w+')
-		file1.write("{}")
-		file2 = open('/home/Devismes_Bridge/JSON_List/MAC_PI.json', 'w+')
-		MAC_PI_GET()
+		
+	if not os.path.exists(file_path1):
+		print "EXIST Device = Create mdp"
+		file1 = open('/home/Devismes_Bridge/JSON_List/mdp.json', 'w+')
+		file1.write('"user": {"mdp": "32dd86af46c29ccd6c1a9ab7b02ba4fbf417e72af3adfa93e3394fb1d81ed847", "change": "0", "user1": "Devismes"}')
+	
+	if not os.path.exists(file_path2):
+		print "EXIST Device = Create mail"
+		file2 = open('/home/Devismes_Bridge/JSON_List/mail.json', 'w+')
+		file2.write('{"mail": {"Dest": "VIDE", "adresse": "VIDE", "token": "VIDE", "MP": "VIDE", "sid": "VIDE", "num_envoi": "VIDE", "num_recep": "VIDE"}}')	
+	
+	if not os.path.exists(file_path3):
+		print "EXIST Device = Create last"
 		file3 = open('/home/Devismes_Bridge/JSON_List/Last_connected.json', 'w+')
-		file3.write("{}")
-		file4 = open('/home/Devismes_Bridge/JSON_List/mail.json', 'w+')
-		file4.write('{"mail":{"adresse":"VIDE", "MP": "VIDE"}}')
-	else:
-		print "EXIST Device = OK"
+		file3.write('{"Heure_ref": {"DATE_MAX": "VIDE"}, "Heure": {"Conn": 0, "DATE_MAX": "VIDE"}}')	
+	
+	if not os.path.exists(file_path4):
+		print "EXIST Device = Create device"
+		file4 = open('/home/Devismes_Bridge/JSON_List/Devices.json', 'w+')
+		file4.write('{}')	
 		
-	file_path2 = "/home/Devismes_Bridge/Equipements/test.txt"
-	directory2 = os.path.dirname(file_path)
+	directory = os.path.dirname(file_path5)
+	
+	if not os.path.exists(directory):
+		os.makedirs(directory)
 		
-	if not os.path.exists(directory2):
-		os.makedirs(directory2)
-		print "EXIST Device = Create"
-	else:
-		print "EXIST Device = OK"
-			
+	if not os.path.exists(file_path5):
+		print "EXIST Device = Create clef"
+		file5 = open('/home/Devismes_Bridge/Equipements/clef/clef.json', 'w+')
+		RAND_M = binascii.b2a_hex(os.urandom(8))
+		file5.write('{"clef": {"clef1":"'+ RAND_M +'"}}')	
+	
+		
 			
 def MAC_PI_GET():
 
@@ -592,7 +647,7 @@ def MAC_PI_GET():
 					
 	with open('/home/Devismes_Bridge/JSON_List/MAC_PI.json', 'w') as f:
 		json.dump(datab, f)
-				
+					
 				
 def main():
 	
@@ -600,6 +655,7 @@ def main():
 	print "SYS_VER:", (sys.version)
 	
 	Creation_Dossier_Device()
+	
 	Invisible1()
 	Start_Scan()
 	Parse_Device()

@@ -3,6 +3,8 @@
 
 import smtplib
 import json
+import subprocess
+import re
 import os
 import os.path
 
@@ -21,6 +23,8 @@ fromaddr = "VIDE"
 password = "VIDE"
 toaddr = "VIDE"
 
+ARGUMENT_ARG = "VIDE"
+
 def Arguments():
 
 	global DEVICE_ARG
@@ -32,6 +36,9 @@ def Arguments():
 	if (len(sys.argv) == 3):
 		DEVICE_ARG = sys.argv[1]
 		Alarme_type_ARG = sys.argv[2]
+		
+	if (len(sys.argv) == 2):
+		Alarme_type_ARG = sys.argv[1]
 
 def type_alarme():
 
@@ -40,6 +47,13 @@ def type_alarme():
 	
 	if (Alarme_type_ARG == '1'): 
 		ALRM = 'Choc sur la porte'
+		montage_mail()
+		envoi_mail()
+		
+	if (Alarme_type_ARG == '3'): 
+		montage_mail2()
+		envoi_mail()
+		
 		
 def montage_mail():
 
@@ -52,6 +66,18 @@ def montage_mail():
 	
 	message_alarme = 'Une alarme à été déclenchée sur votre serrure "' + DEVICE_ARG + '" à ' + Heure_Scan1 + 'le ' + Heure_Scan2 + '\n' + 'Alarme de type: ' + ALRM
 	print	message_alarme
+	
+def montage_mail2():
+
+	global DEVICE_ARG
+	global message_alarme
+	global ALRM
+	
+	Heure_Scan1 = strftime("%H:%M:%S ", time.localtime())
+	Heure_Scan2 = strftime("%d-%m-%Y ", time.localtime())
+	
+	message_alarme = 'E-mail de test envoyé depuis votre passerelle connectée Devismes à ' + Heure_Scan1 + 'le ' + Heure_Scan2
+	print	message_alarme
 			
 	
 def recup_mail():
@@ -63,13 +89,25 @@ def recup_mail():
 	with open('/home/Devismes_Bridge/JSON_List/mail.json') as f:
 		dataa = json.load(f)	
 		
-	print "OK"	
+	print "OK1"	
 	fromaddr = dataa['mail']['adresse'] 
-	password = dataa['mail']['MP']
 	toaddr= dataa['mail']['Dest']
+	password = dataa['mail']['MP']
+	
+	process = subprocess.Popen("sudo python /home/Devismes_Bridge/Programmes/compteur_serrure.py 9", shell=True, stdout=subprocess.PIPE)
+	process.wait()
+	(out, err) = process.communicate()
+	Data_Scan = out.splitlines()
+	
+	#print "LEN", len(Data_Scan)
+	#print Data_Scan
+	MP1 = Data_Scan[16].split(":")
+	
+	password = MP1[1]
+	
+	print "PSWD", password
 		
 
-	
 def envoi_mail():
 
 	global message_alarme
@@ -108,6 +146,7 @@ def Creation_Dossier_Device():
 	else:
 		print "EXIST Device = OK"
 
+		
 def main():
 
 	print("MAIN")
@@ -115,11 +154,9 @@ def main():
 	
 	Arguments()
 	Creation_Dossier_Device()
-	type_alarme()
 	recup_mail()
-	montage_mail()
-	envoi_mail()
+	type_alarme()
+	
 
-		
 if __name__ == "__main__":
     main()
