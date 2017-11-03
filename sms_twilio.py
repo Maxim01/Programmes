@@ -54,8 +54,8 @@ def envoi_sms():
 	global Message_envoi
 	
 	print "ENVOI en cours"
-	account_sid = SID #"AC672f63c89ea69fb97c91c66a68216576" # Your Account SID from twilio.com/console
-	auth_token  = token #"cdad8a674f646e2b4a4b509de28902af"   # Your Auth Token from twilio.com/console
+	account_sid = SID 
+	auth_token  = token 
 	
 	numero_reception1 = numero_reception
 	numero_envoi1 = numero_envoi
