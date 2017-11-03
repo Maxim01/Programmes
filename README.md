@@ -1,2 +1,2 @@
 # Programmes
-"La simplicité est la sophistications suprême"
+"La simplicité est la sophistication suprême"
